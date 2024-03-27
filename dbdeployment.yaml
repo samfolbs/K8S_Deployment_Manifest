@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: viprodb
+  labels:
+    app: db-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-app
+  template:
+    metadata:
+      labels:
+        app: db-app
+    spec:
+      containers:
+      - name: db-app
+        image: samfolbs/vprofiledb:V1
+        volumeMounts:
+         - name: db-data
+           mountPath: /var/lib/mysql
+        ports:
+        - name: db-port
+          containerPort: 3306
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-secret
+                key: db-pass
+      nodeSelector:
+        zone: us-east-2a
+      volumes:
+        - name: db-data
+          awsElasticBlockStore:
+            volumeID: vol-0bcd6daaxxxxxxxxx
+            fsType: ext4
+      
+      initContainers:
+        - name: busybox
+          image: busybox:latest
+          args: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+          volumeMounts:
+            - name:  db-data
+              mountPath:  /var/lib/mysql
+
+

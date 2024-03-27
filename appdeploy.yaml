@@ -1,0 +1,29 @@
+apiVersion: apps/v1 
+kind: Deployment 
+metadata: 
+  name: vproapp
+  labels:
+    app: Tomapp
+spec:
+  selector:
+    matchlabels:
+      app: Tomapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: Tomapp
+    spec:
+      containers:
+        - name: Tomapp1
+          image: samfolbs/vprofileapp:V1
+          ports:
+            - name: Tomapp-port
+              containerPort: 8080
+      initContainers:
+        - name: init-mydb
+          image: busybox
+          command: ['sh', '-c', 'untill nslookup vprodb; do echo waiting for mydb; sleep 2; done']
+        - name: init-memcache
+          image: busybox
+          command: ['sh', '-c', until nslookup memc-deploy; do echo waiting for mydb; sleep 2; done]
